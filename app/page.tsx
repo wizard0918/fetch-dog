@@ -1,101 +1,228 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { useState, ChangeEvent, FormEvent, useEffect } from 'react';
+import {
+  Box,
+  Container,
+  Typography,
+  FormControl,
+  InputLabel,
+  Input,
+  InputAdornment,
+  Button,
+  CircularProgress,
+} from '@mui/material';
+import { AccountCircleOutlined, EmailOutlined } from '@mui/icons-material';
+import { useRouter } from 'next/navigation';
+import Auth from './services/auth';
+import { FormState, ErrorState } from './types';
+
+/**
+ * Login component for user authentication
+ * Handles form validation, submission, and error display.
+ */
+export default function Login() {
+  const router = useRouter();
+
+  // Local state to manage form inputs, error states, and loading state
+  const [formState, setFormState] = useState<FormState>({ name: '', email: '' });
+  const [errorState, setErrorState] = useState<ErrorState>({ nameError: false, emailError: false });
+  const [errorMsg, setErrorMsg] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(false); // Loading state to show progress
+
+  // Check if the user is already logged in and redirect if true
+  useEffect(() => {
+    const user = Auth.getUser();
+    if (user) {
+      router.push('/dogs');
+    }
+  }, [router]);
+
+  // Handle input change and reset the respective error state
+  const inputChangeHandler = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setErrorState((prev) => ({ ...prev, [`${name}Error`]: false }));
+    setFormState((prev) => ({ ...prev, [name]: value }));
+  };
+
+  /**
+   * Validates the name input to ensure it is not empty.
+   * @returns {boolean} Returns true if valid, false if invalid.
+   */
+  const validateName = (): boolean => {
+    if (formState.name.trim() === '') {
+      setErrorState((prev) => ({ ...prev, nameError: true }));
+      return false;
+    }
+    return true;
+  };
+
+  /**
+   * Validates the email input using a regex pattern.
+   * @returns {boolean} Returns true if valid, false if invalid.
+   */
+  const validateEmail = (): boolean => {
+    const emailPattern = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9-]+\.[a-zA-Z]{2,}$/;
+    if (!formState.email.match(emailPattern)) {
+      setErrorState((prev) => ({ ...prev, emailError: true }));
+      return false;
+    }
+    return true;
+  };
+
+  /**
+   * Handles form submission, validates fields, and makes the API call for login.
+   * @param e The form submission event.
+   */
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    // Validate name and email before proceeding with submission
+    const isNameValid = validateName();
+    const isEmailValid = validateEmail();
+
+    // If either field is invalid, show error message and prevent form submission
+    if (!isNameValid || !isEmailValid) {
+      setErrorMsg('Please complete both fields before submitting');
+      return;
+    }
+
+    // Start loading state
+    setLoading(true);
+
+    // Attempt to authenticate the user by calling the API
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/auth/login`, {
+        method: 'POST',
+        body: JSON.stringify(formState),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+      });
+
+      if (response.ok) {
+        // Store the user session and redirect
+        Auth.login(formState);
+        router.push('/dogs');
+      } else {
+        setErrorMsg('Failed to login. Please try again.');
+      }
+    } catch (err) {
+      console.error('Login error:', err);
+      setErrorMsg('Failed to login. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
+    <Box
+      component="main"
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        backgroundColor: '#f4f4f9',
+        padding: '2rem',
+      }}
+    >
+      <Container
+        maxWidth="sm"
+        sx={{
+          textAlign: 'center',
+          borderRadius: '1rem',
+          padding: '2rem',
+          boxShadow: '0px 4px 12px rgba(0, 0, 0, 0.1)',
+          backgroundColor: '#ffffff',
+        }}
+      >
+        <Box
+          component="img"
+          src="/images/logo.png"
+          alt="Fetch Logo"
+          sx={{ width: '150px', margin: '0 auto 1.5rem' }}
         />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
+        <Typography
+          variant="h4"
+          component="h1"
+          sx={{ marginBottom: '1.5rem', color: '#6504b5', fontWeight: 'bold' }}
+        >
+          Dog Lover Search
+        </Typography>
+        <Box
+          component="form"
+          onSubmit={handleSubmit}
+          sx={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}
+        >
+          <FormControl variant="standard" sx={{ width: '100%' }}>
+            <InputLabel htmlFor="name">Name</InputLabel>
+            <Input
+              id="name"
+              name="name"
+              value={formState.name}
+              error={errorState.nameError}
+              onChange={inputChangeHandler}
+              onBlur={validateName}
+              startAdornment={
+                <InputAdornment position="start">
+                  <AccountCircleOutlined />
+                </InputAdornment>
+              }
             />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            {errorState.nameError && (
+              <Typography variant="caption" color="error">
+                Name cannot be empty
+              </Typography>
+            )}
+          </FormControl>
+
+          <FormControl variant="standard" sx={{ width: '100%' }}>
+            <InputLabel htmlFor="email">Email</InputLabel>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              value={formState.email}
+              error={errorState.emailError}
+              onChange={inputChangeHandler}
+              onBlur={validateEmail}
+              startAdornment={
+                <InputAdornment position="start">
+                  <EmailOutlined />
+                </InputAdornment>
+              }
+            />
+            {errorState.emailError && (
+              <Typography variant="caption" color="error">
+                Please enter a valid email address
+              </Typography>
+            )}
+          </FormControl>
+
+          <Button
+            type="submit"
+            variant="contained"
+            sx={{
+              marginTop: '1rem',
+              backgroundColor: '#6504b5',
+              color: '#ffffff',
+              border: 'solid 1px #6504b5',
+              '&:hover': { backgroundColor: '#ffffff', color: '#6504b5', borderColor: '#6504b5' },
+            }}
+            disabled={loading}
           >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
+            {loading ? <CircularProgress size={24} color="inherit" /> : 'Sign In'}
+          </Button>
+
+          {errorMsg && (
+            <Typography variant="body2" color="error" sx={{ marginTop: '1rem' }}>
+              {errorMsg}
+            </Typography>
+          )}
+        </Box>
+      </Container>
+    </Box>
   );
 }
