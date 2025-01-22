@@ -99,7 +99,6 @@ const SearchBar: React.FC<SearchBarProps> = ({
         acc[key] = value;
         return acc;
       }, {} as Record<string, any>);
-      console.log(searchParams)
     setSearchParams(searchParams);
   };
 

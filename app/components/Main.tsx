@@ -1,6 +1,6 @@
 'use client';
 
-import { Box, Button, Typography, Pagination } from '@mui/material';
+import { Box, Typography, Pagination } from '@mui/material';
 import React, { useEffect, useState } from 'react';
 import DogCard from './DogCard';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
@@ -31,7 +31,7 @@ const Main: React.FC<MainProps> = ({ favoritesList, setFavoritesList, dogData, p
     return acc;
   }, {} as Record<string, string>);
 
-  const totalPages = Math.ceil((paginationData?.total || 0) / +searchParamsObject['size']!);
+  const totalPages = Math.ceil((paginationData?.total || 0) / (+searchParamsObject['size']! || 25));
   // Logic in useEffect to handle page changes and button disabling
   useEffect(() => {
     const from = +searchParamsObject['from']! || 0;

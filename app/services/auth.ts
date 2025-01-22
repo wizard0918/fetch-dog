@@ -1,5 +1,3 @@
-import { useRouter } from 'next/router';
-
 interface User {
   name: string;
   email: string;
