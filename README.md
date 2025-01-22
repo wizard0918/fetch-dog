@@ -4,7 +4,7 @@
 
 If you're passionate about dogs and always on the lookout for a new companion, this application is made for you! It allows you to explore a wide variety of dogs, search based on breed, age, and zip code, and even match with your favorite pup. Dive into a seamless experience of finding your next furry friend!
 
-You can start the app by visiting [this link]().
+You can start the app by visiting [this link](https://fantastic-palmier-7dc2f5.netlify.app/).
 
 ## Setup Instructions
 
