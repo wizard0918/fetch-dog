@@ -13,8 +13,8 @@ interface PaginationData {
 }
 
 interface MainProps {
-  favoritesList: any[];
-  setFavoritesList: React.Dispatch<React.SetStateAction<any[]>>;
+  favoritesList: string[];
+  setFavoritesList: React.Dispatch<React.SetStateAction<string[]>>;
   dogData: DogData[];
   paginationData: PaginationData | null;
 }

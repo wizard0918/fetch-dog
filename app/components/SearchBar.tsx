@@ -14,13 +14,13 @@ import {
   OutlinedInput,
 } from '@mui/material';
 import AgeSlider from './AgeSlider'; 
-import { SearchTerms } from '../types';
+import { SearchTerms, DogData } from '../types';
 
 interface SearchBarProps {
   setFavoritesList: React.Dispatch<React.SetStateAction<string[]>>;
-  setSearchParams: (params: Record<string, any>) => void;
+  setSearchParams: (params: Record<string, string | number>) => void;
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  setMatch: React.Dispatch<React.SetStateAction<any>>;
+  setMatch: React.Dispatch<React.SetStateAction<DogData | undefined>>;
   favoritesList: string[];
   setIsMatchLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -94,11 +94,11 @@ const SearchBar: React.FC<SearchBarProps> = ({
     }
 
     const searchParams = Object.entries(searchTerms)
-      .filter(([_, value]) => value !== '')
+      .filter(([, value]) => value !== '')
       .reduce((acc, [key, value]) => {
         acc[key] = value;
         return acc;
-      }, {} as Record<string, any>);
+      }, {} as Record<string, string | number>);
     setSearchParams(searchParams);
   };
 

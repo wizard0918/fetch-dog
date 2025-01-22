@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import Auth from "../services/auth";
 import { useRouter } from 'next/navigation';
 import Header from "../components/Header";
@@ -16,10 +16,10 @@ export default function DogsLayout({ children }: { children: React.ReactNode }) 
   }, [router]);
 
   return (
-    <div>
+    <Suspense fallback={<div>Loading...</div>}>
       <Header></Header>    
       <main>{children}</main>
-    </div>
+    </Suspense>
   );
 }
   

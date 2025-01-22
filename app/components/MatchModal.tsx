@@ -39,7 +39,7 @@ const MatchModal: React.FC<MatchModalProps> = ({ isModalOpen, setIsModalOpen, ma
         {!isMatchLoading && matchData && (
           <CardContent sx={{ textAlign: 'center' }}>
             <Typography variant="h5" component="h4" className="mb-4">
-              <em>You've been matched with</em>
+              <em>You have been matched with</em>
             </Typography>
             <Button
               onClick={handleClose}
